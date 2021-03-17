@@ -49,6 +49,25 @@ const paths = klawSync(SOURCE_DIR, {
   nodir: true
 });
 
+async function uploadShowConfigs(configJson) {
+  return Promise.all(['streamUrlsPrimary', 'streamUrlsSecondary', 'streamUrlTertiary'].map(async showKey => {
+    const showConfig = configJson[showKey];
+    const { showId } = showConfig;
+    if (showId == null || showId.trim() === '') {
+      return;
+    }
+    const bucketPath = path.join(DESTINATION_DIR, '../shows', showId, `${DESTINATION_FILENAME}.json`);
+    const params = {
+      Bucket: BUCKET,
+      ACL: 'public-read',
+      Body: JSON.stringify(showConfig, null, 2),
+      Key: bucketPath,
+      ContentType: 'application/json'
+    };
+    return upload(params);
+  }));
+}
+
 function upload(params) {
   return new Promise((resolve, reject) => {
     s3.upload(params, (err, data) => {
@@ -69,14 +88,15 @@ function run() {
   return Promise.all(
     paths.map(async p => {
       const fileContents = await readFile(p.path);fs.createReadStream(p.path);
-      const contentsAsJson = JSON.stringify(matter(fileContents.toString()).data, null, 2);
+      const contentsAsJson = matter(fileContents.toString()).data;
       const basename = path.basename(p.path, '.md');
       const hash = crypto.createHmac('sha256', SECRET_HASH_SALT).update(basename).digest('hex').slice(0, HASH_LENGTH);
       const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}.json`);
+      await uploadShowConfigs(contentsAsJson);
       const params = {
         Bucket: BUCKET,
         ACL: 'public-read',
-        Body: contentsAsJson,
+        Body: JSON.stringify(contentsAsJson, null, 2),
         Key: bucketPath,
         ContentType: 'application/json'
       };
