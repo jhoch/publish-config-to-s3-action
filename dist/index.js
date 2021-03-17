@@ -57,8 +57,9 @@ const paths = klawSync(SOURCE_DIR, {
 });
 
 async function uploadShowConfigs(configJson) {
-  return Promise.all(['streamUrlsPrimary', 'streamUrlsSecondary', 'streamUrlTertiary'].map(async showKey => {
+  return Promise.all(['streamUrlsPrimary', 'streamUrlsSecondary', 'streamUrlsTertiary'].map(async showKey => {
     const showConfig = configJson[showKey];
+    core.info(showKey, JSON.stringify(showConfig));
     const { showId } = showConfig;
     if (showId == null || showId.trim() === '') {
       return;
