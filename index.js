@@ -48,9 +48,13 @@ const paths = klawSync(SOURCE_DIR, {
 });
 
 function upload(params) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     s3.upload(params, (err, data) => {
-      if (err) core.error(err);
+      if (err) {
+          core.error(err);
+          reject(err);
+          return;
+      }
       core.info(`uploaded - ${data.Key}`);
       core.info(`located - ${data.Location}`);
       resolve(data.Location);
@@ -68,7 +72,7 @@ function run() {
       const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}.${CONFIG_FILE_EXTENSION}`);
       const params = {
         Bucket: BUCKET,
-        ACL: 'public-read',
+        ACL: 'private',
         Body: fileStream,
         Key: bucketPath,
         ContentType: 'text/plain'
