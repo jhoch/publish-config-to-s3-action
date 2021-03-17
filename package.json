@@ -1,0 +1,20 @@
+{
+  "name": "publish-config-to-s3-action",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx ncc build index.js --license licenses.txt",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jason Hoch",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "aws-sdk": "^2.865.0",
+    "klaw-sync": "^6.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.27.0"
+  }
+}

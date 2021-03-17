@@ -1,0 +1,39 @@
+name: "Publish config to S3"
+description: "Publishes Netlify CMS config to private S3 location"
+inputs:
+  aws_access_key:
+    description: "AWS Access Key"
+    required: true
+  aws_secret_access_key:
+    description: "AWS Secret Access Key"
+    required: true
+  aws_bucket:
+    description: "AWS Bucket name"
+    required: true
+  source_dir:
+    description: "(Source) directory containing config files"
+    required: true
+  destination_dir:
+    description: "(Bucket) directory containing config files"
+    required: true
+  secret_hash_salt:
+    description: "Private salt used to obscure S3 location, deterministically"
+    required: true
+  config_file_extension:
+    description: "File extension of config files"
+    required: false
+    default: ".md"
+  hash_length:
+    description: "Length of obfuscating hash to add"
+    required: false
+    default: 12
+  destination_filename:
+    description: "Filename in which configs should be stored (without extension)"
+    required: false
+    default: config
+outputs:
+  config_locations:
+    description: "The (private) locations of the configs in S3"
+runs:
+  using: "node12"
+  main: "dist/index.js"
