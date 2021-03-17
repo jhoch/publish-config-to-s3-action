@@ -7,7 +7,7 @@ const core = require('@actions/core');
 const S3 = require('aws-sdk/clients/s3');
 
 function getInputOrDefault(inputName, defaultValue) {
-    const value = core.getInput('destination_filename', { required: false });
+    const value = core.getInput(inputName, { required: false });
     if (value == null) {
         return defaultValue;
     }
@@ -68,12 +68,8 @@ function run() {
     paths.map(p => {
       const fileStream = fs.createReadStream(p.path);
       const basename = path.basename(p.path, CONFIG_FILE_EXTENSION);
-      core.info(basename);
       const hash = crypto.createHmac('sha256', SECRET_HASH_SALT).update(basename).digest('hex').slice(0, HASH_LENGTH);
-      core.info(HASH_LENGTH);
-      core.info(hash);
       const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}.${CONFIG_FILE_EXTENSION}`);
-      core.info(bucketPath);
       const params = {
         Bucket: BUCKET,
         ACL: 'private',
@@ -89,7 +85,7 @@ function run() {
 run()
   .then(locations => {
     core.info(`config locations - ${locations}`);
-    core.setOutput('config_locations', locations);
+    core.setOutput('locations', locations);
   })
   .catch(err => {
     core.error(err);
