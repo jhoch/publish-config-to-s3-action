@@ -76,7 +76,7 @@ function run() {
       const fileStream = fs.createReadStream(p.path);
       const basename = path.basename(p.path, CONFIG_FILE_EXTENSION);
       const hash = crypto.createHmac('sha256', SECRET_HASH_SALT).update(basename).digest('hex').slice(0, HASH_LENGTH);
-      const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}.${CONFIG_FILE_EXTENSION}`);
+      const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}${CONFIG_FILE_EXTENSION}`);
       const params = {
         Bucket: BUCKET,
         ACL: 'private',
