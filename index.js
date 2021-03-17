@@ -53,7 +53,7 @@ async function uploadShowConfigs(configJson) {
   core.info(JSON.stringify(Object.keys(configJson)));
   return Promise.all(['streamUrlsPrimary', 'streamUrlsSecondary', 'streamUrlsTertiary'].map(async showKey => {
     const showConfig = configJson[showKey];
-    core.info(showKey, JSON.stringify(showConfig));
+    core.info(showKey, showConfig, JSON.stringify(showConfig));
     const { showId } = showConfig;
     if (showId == null || showId.trim() === '') {
       return;
