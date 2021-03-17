@@ -1,10 +1,14 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
 
-const klawSync = require('klaw-sync');
 const core = require('@actions/core');
 const S3 = require('aws-sdk/clients/s3');
+const matter = require('gray-matter');
+const klawSync = require('klaw-sync');
+
+const readFile = promisify(fs.readFile);
 
 function getInputOrDefault(inputName, defaultValue) {
     const value = core.getInput(inputName, { required: false });
@@ -32,8 +36,6 @@ const DESTINATION_DIR = core.getInput('destination_dir', {
 const SECRET_HASH_SALT = core.getInput('secret_hash_salt', {
   required: true
 });
-const DEFAULT_CONFIG_FILE_EXTENSION = '.md';
-const CONFIG_FILE_EXTENSION = getInputOrDefault('config_file_extension', DEFAULT_CONFIG_FILE_EXTENSION);
 const DEFAULT_HASH_LENGTH = 12;
 const HASH_LENGTH = getInputOrDefault('hash_length', DEFAULT_HASH_LENGTH);
 const DEFAULT_DESTINATION_FILENAME = 'config';
@@ -65,17 +67,18 @@ function upload(params) {
 function run() {
   const sourceDir = path.join(process.cwd(), SOURCE_DIR);
   return Promise.all(
-    paths.map(p => {
-      const fileStream = fs.createReadStream(p.path);
-      const basename = path.basename(p.path, CONFIG_FILE_EXTENSION);
+    paths.map(async p => {
+      const fileContents = await readFile(p.path);fs.createReadStream(p.path);
+      const contentsAsJson = JSON.stringify(matter(fileContents.toString()).data, null, 2);
+      const basename = path.basename(p.path, '.md');
       const hash = crypto.createHmac('sha256', SECRET_HASH_SALT).update(basename).digest('hex').slice(0, HASH_LENGTH);
-      const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}${CONFIG_FILE_EXTENSION}`);
+      const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}.json`);
       const params = {
         Bucket: BUCKET,
         ACL: 'private',
-        Body: fileStream,
+        Body: contentsAsJson,
         Key: bucketPath,
-        ContentType: 'text/plain'
+        ContentType: 'application/json'
       };
       return upload(params);
     })
