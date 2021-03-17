@@ -13,6 +13,14 @@ const klawSync = __nccwpck_require__(9036);
 const core = __nccwpck_require__(2186);
 const S3 = __nccwpck_require__(3256);
 
+function getInputOrDefault(inputName, defaultValue) {
+    const value = core.getInput('destination_filename', { required: false });
+    if (value == null) {
+        return defaultValue;
+    }
+    return value;
+}
+
 const AWS_ACCESS_KEY = core.getInput('aws_access_key', {
   required: true
 });
@@ -32,17 +40,11 @@ const SECRET_HASH_SALT = core.getInput('secret_hash_salt', {
   required: true
 });
 const DEFAULT_CONFIG_FILE_EXTENSION = '.md';
-const CONFIG_FILE_EXTENSION = core.getInput('config_file_extension', {
-  required: false
-}) ?? DEFAULT_CONFIG_FILE_EXTENSION;
+const CONFIG_FILE_EXTENSION = getInputOrDefault('config_file_extension', DEFAULT_CONFIG_FILE_EXTENSION);
 const DEFAULT_HASH_LENGTH = 12;
-const HASH_LENGTH = core.getInput('hash_length', {
-  required: false
-}) ?? DEFAULT_HASH_LENGTH;
+const HASH_LENGTH = getInputOrDefault('hash_length', DEFAULT_HASH_LENGTH);
 const DEFAULT_DESTINATION_FILENAME = 'config';
-const DESTINATION_FILENAME = core.getInput('destination_filename', {
-  required: false
-}) ?? DEFAULT_DESTINATION_FILENAME;
+const DESTINATION_FILENAME = getInputOrDefault('destination_filename', DEFAULT_DESTINATION_FILENAME);
 
 const s3 = new S3({
   accessKeyId: AWS_ACCESS_KEY,
