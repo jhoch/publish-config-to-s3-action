@@ -82,7 +82,7 @@ function run() {
       const bucketPath = path.join(DESTINATION_DIR, `${basename}-${hash}`, `${DESTINATION_FILENAME}.json`);
       const params = {
         Bucket: BUCKET,
-        ACL: 'private',
+        ACL: 'public-read',
         Body: contentsAsJson,
         Key: bucketPath,
         ContentType: 'application/json'
